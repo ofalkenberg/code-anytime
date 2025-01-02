@@ -18,6 +18,4 @@ Here is a small collection of scripts and advices to allow people to write code 
 
 After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`.
 
-You do git push to a private, shadow copy of your repository, and only push to the real repository when you are officially not supposed to be working.
-
-This all can also be automated with a cron job.
+You do `git push` to a private, shadow copy of your repository, and only push to the real repository when you are officially not supposed to be working. This all can also be automated with a cron job.
