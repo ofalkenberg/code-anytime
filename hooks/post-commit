@@ -37,7 +37,7 @@ else
 fi
 
 offset=0
-future_time=""
+commit_time=""
 faked=false
 while true; do
     day=$($DATE -d "${offset} min" +"%a")
@@ -47,17 +47,17 @@ while true; do
         faked=true
         continue
     fi
-    future_time=$($DATE -d "${offset} min" +"%Y-%m-%d %H:%M:%S")
+    commit_time=$($DATE -d "${offset} min" +"%Y-%m-%d %H:%M:%S")
     break
 done
 if [ "$faked" = true ]; then
-    echo "Fake time: [${future_time}]"
+    echo "fake commit time: [${commit_time}]"
 else
-    echo "Real time: [${future_time}]"
+    echo "real commit time: [${commit_time}]"
     exit 0
 fi
 
-GIT_AUTHOR_DATE="$($DATE --date="${future_time}" --iso-8601=seconds)"
+GIT_AUTHOR_DATE="$($DATE --date="${commit_time}" --iso-8601=seconds)"
 GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
 export GIT_AUTHOR_DATE
 export GIT_COMMITTER_DATE
