@@ -1,0 +1,6 @@
+#! /bin/sh
+
+if [ -z "$REWRITE_HOOK_DONE" ]; then
+    git filter-repo --commit-callback "commit.committer_date = commit.author_date" --force
+    REWRITE_HOOK_DONE=1
+fi
