@@ -8,7 +8,7 @@ check_allowed() {
     else                           # weekdays
         if [ "$hour" -lt 9 ]; then # allow before 9am
             echo "Allowed"
-        elif [ "$hour" -ge 12 ] && [ "$hour" -le 13 ]; then # allow between 12pm and 1pm
+        elif [ "$hour" = 12 ]; then # allow between 12pm and 1pm
             echo "Allowed"
         elif [ "$hour" -ge 23 ]; then # allow after 11pm
             echo "Allowed"
