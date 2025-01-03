@@ -36,24 +36,42 @@ else
     exit 1
 fi
 
-offset=0
+allowed_now=false
+day=$($DATE -d "${ts_latest} +${offset} min" +"%a")
+hour=$($DATE -d "${ts_latest} +${offset} min" +"%H")
+if [ "$(check_allowed "$day" "$hour")" = "Allowed" ]; then
+    allowed_now=true
+fi
+
+ts_latest=$(git log --pretty=format:%ci | sort -n | tail -1)
+
+if [ "$allowed_now" = true ]; then
+    echo "allowed to commit now."
+    if [ "$($DATE -d "ts_latest" +%s)" -gt "$($DATE +%s)" ]; then
+        echo "but there are commits in the future."
+    else
+        echo "and there are no commits in the future."
+        exit 0
+    fi
+fi
+
 commit_time=""
-faked=false
 fuzz="$(od -An -N2 -t u2 /dev/urandom | tr -dc '0-9')"
 fuzz=$((fuzz % 10))
-ts_latest=$(git log -1 --pretty=format:"%ci")
+offset=$fuzz
+
+echo "latest commit time: [${ts_latest}]"
 while true; do
     day=$($DATE -d "${ts_latest} +${offset} min" +"%a")
     hour=$($DATE -d "${ts_latest} +${offset} min" +"%H")
     if [ "$(check_allowed "$day" "$hour")" != "Allowed" ]; then
         offset=$((offset + fuzz))
-        faked=true
         continue
     fi
     commit_time=$($DATE -d "${ts_latest} +${offset} min" +"%Y-%m-%d %H:%M:%S")
     break
 done
-if [ "$faked" = true ]; then
+if [ "$($DATE -d "$commit_time" +%s)" -gt "$($DATE +%s)" ]; then
     echo "fake commit time: [${commit_time}]"
 else
     echo "real commit time: [${commit_time}]"
