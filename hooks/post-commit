@@ -37,8 +37,8 @@ else
 fi
 
 allowed_now=false
-day=$($DATE -d "${ts_latest} +${offset} min" +"%a")
-hour=$($DATE -d "${ts_latest} +${offset} min" +"%H")
+day=$($DATE -d "+${offset} min" +"%a")
+hour=$($DATE -d "+${offset} min" +"%H")
 if [ "$(check_allowed "$day" "$hour")" = "Allowed" ]; then
     allowed_now=true
 fi
@@ -47,7 +47,7 @@ ts_latest=$(git log --pretty=format:%ci | sort -n | tail -1)
 
 if [ "$allowed_now" = true ]; then
     echo "allowed to commit now."
-    if [ "$($DATE -d "ts_latest" +%s)" -gt "$($DATE +%s)" ]; then
+    if [ "$($DATE -d "${ts_latest}" +%s)" -gt "$($DATE +%s)" ]; then
         echo "but there are commits in the future."
     else
         echo "and there are no commits in the future."
