@@ -16,7 +16,7 @@ Here is a small collection of scripts and advices to allow people to write code 
 2) Make sure they are executable by using: `chmod +x <project_home>/.git/hooks/*`
 3) Then you source the shell aliases from the `shell-aliases` directory. Tested only with ZSH currently.
 
-After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`.
+After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`. Otherwise the rebase date can leak.
 
 And use the `gitpush` command instead of `git push`. It will now complete if you do it when not authorized or if there are commits scheduled in the future. Try again later.
 
