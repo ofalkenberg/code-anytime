@@ -43,14 +43,14 @@ fuzz="$(od -An -N2 -t u2 /dev/urandom | tr -dc '0-9')"
 fuzz=$((fuzz % 10))
 ts_latest=$(git log -1 --pretty=format:"%ci")
 while true; do
-    day=$($DATE -d "$ts_latest +${offset} min" +"%a")
-    hour=$($DATE -d "$ts_latest +${offset} min" +"%H")
+    day=$($DATE -d "${ts_latest} +${offset} min" +"%a")
+    hour=$($DATE -d "${ts_latest} +${offset} min" +"%H")
     if [ "$(check_allowed "$day" "$hour")" != "Allowed" ]; then
         offset=$((offset + fuzz))
         faked=true
         continue
     fi
-    commit_time=$($DATE -d "$ts_latest +${offset} min" +"%Y-%m-%d %H:%M:%S")
+    commit_time=$($DATE -d "${ts_latest} +${offset} min" +"%Y-%m-%d %H:%M:%S")
     break
 done
 if [ "$faked" = true ]; then
