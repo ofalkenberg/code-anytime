@@ -26,13 +26,24 @@ gitrebase() {
 gitpush() {
   DATE="date"
 
+  if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+    echo "no remote found, that would be a dry-run."
+    return 1
+  fi
+
+  UNPUSHED="$(git cherry @{u} HEAD)"
+  if [ -z "$UNPUSHED" ]; then
+    echo "no unpushed commits found."
+    return 0
+  fi
+
   day=$($DATE +"%a")
   hour=$($DATE +"%H")
 
   current_time=$($DATE +%s)
   temp_file="$(mktemp)" || return 1
   if [ "$(check_allowed "$day" "$hour")" != "Allowed" ]; then
-    echo "you can't push now."
+    echo "you can't push now because it would be visible."
     return 1
   fi
 
