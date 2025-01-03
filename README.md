@@ -14,7 +14,7 @@ Here is a small collection of scripts and advices to allow people to write code 
 
 1) Copy the files from the `hooks` repository into the `<project_home>/.git/hooks` directory.
 2) Make sure they are executable by using: `chmod +x <project_home>/.git/hooks/*`
-3) Then you source the shell aliases from the `shell-aliases` directory.
+3) Then you source the shell aliases from the `shell-aliases` directory. Tested only with ZSH currently.
 
 After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`.
 
