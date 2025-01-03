@@ -39,15 +39,16 @@ fi
 offset=0
 commit_time=""
 faked=false
+ts_latest=$(git log -1 --pretty=format:"%ci")
 while true; do
-    day=$($DATE -d "${offset} min" +"%a")
-    hour=$($DATE -d "${offset} min" +"%H")
+    day=$($DATE -d "$ts_latest +${offset} min" +"%a")
+    hour=$($DATE -d "$ts_latest +${offset} min" +"%H")
     if [ "$(check_allowed "$day" "$hour")" != "Allowed" ]; then
-        offset=$((offset + 15))
+        offset=$((offset + 1))
         faked=true
         continue
     fi
-    commit_time=$($DATE -d "${offset} min" +"%Y-%m-%d %H:%M:%S")
+    commit_time=$($DATE -d "$ts_latest +${offset} min" +"%Y-%m-%d %H:%M:%S")
     break
 done
 if [ "$faked" = true ]; then
