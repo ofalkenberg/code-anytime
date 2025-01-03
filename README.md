@@ -18,7 +18,7 @@ Here is a small collection of scripts and advices to allow people to write code 
 
 After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`.
 
-And use the `gitpush` command instead of `git push`.
+And use the `gitpush` command instead of `git push`. It will now complete if you do it when not authorized or if there are commits scheduled in the future. Try again later.
 
 You can also do `git push` to a private, shadow copy of your repository, and only push to the real repository when you are officially not supposed to be working. This can be automated with a cron job.
 
