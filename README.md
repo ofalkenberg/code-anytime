@@ -1,6 +1,6 @@
 # Code Anytime
 
-A small set of scripts and advices to let you code whenever you want, while it looks like you are only committing in your free hours.
+A small set of scripts and advice to let you code whenever you want, while it looks like you are only committing in your free hours.
 
 ## Description
 
@@ -8,15 +8,15 @@ Writing and contributing to free software is how developers stay excited for pro
 
 This situation is, in my opinion, quite paradox and also not great. Good employers should acknowledge that contributing to open source software is very important, and they should allow employees to do it even during the day.
 
-Here is a small collection of scripts and advices to allow people to write code whenever they want. On GitHub, the time stamps will always look as if the commits were made early in the morning, during lunch break, in the evening, or over the weekend.
+Here is a small collection of scripts and advice to allow people to write code whenever they want. On GitHub, the timestamps will always look as if the commits were made early in the morning, during lunch break, in the evening, or over the weekend.
 
 ## How to install
 
-1) Copy the files from the `hooks` repository into the `<project_home>/.git/hooks` directory.
+1) Copy the files from the `hooks` directory into the `<project_home>/.git/hooks` directory.
 2) Make sure they are executable by using: `chmod +x <project_home>/.git/hooks/*`
 3) Then you source the shell aliases from the `shell-aliases` directory. Tested only with ZSH currently.
 
-After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase --interactive`. Otherwise the rebase date can leak.
+After you have loaded the aliases, please always use the `gitrebase` command instead of `git rebase` (especially interactive rebase). Otherwise, the real commit timestamps might be exposed during the rebase process.
 
 And use the `gitpush` command instead of `git push`. It will not complete if you do it when not authorized or if there are commits scheduled in the future. Try again later.
 
