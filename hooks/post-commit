@@ -22,32 +22,31 @@ if [ -n "$GIT_COMMITTER_DATE" ]; then
     exit 0
 fi
 
+# fmt_ts <epoch> <format>, LC_ALL=C so %a yields English day names
 if command -v gdate >/dev/null 2>&1; then
-    DATE="gdate"
-elif command -v date >/dev/null 2>&1; then
-    if date --version 2>&1 | grep -q "GNU coreutils"; then
-        DATE="date"
-    else
-        echo "Error: 'date' command found but it isn't GNU date."
-        exit 1
-    fi
+    fmt_ts() { LC_ALL=C gdate -d "@$1" +"$2"; }
+elif date --version 2>/dev/null | grep -q "GNU coreutils"; then
+    fmt_ts() { LC_ALL=C date -d "@$1" +"$2"; }
+elif date -u -r 0 +%s >/dev/null 2>&1; then # BSD date
+    fmt_ts() { LC_ALL=C date -r "$1" +"$2"; }
 else
-    echo "Error: No suitable date command found (gdate or GNU date)."
+    echo "Error: No suitable date command found (GNU, gdate or BSD)."
     exit 1
 fi
 
+now=$(date +%s)
 allowed_now=false
-day=$($DATE -d "+${offset} min" +"%a")
-hour=$($DATE -d "+${offset} min" +"%H")
+day=$(fmt_ts "$now" "%a")
+hour=$(fmt_ts "$now" "%H")
 if [ "$(check_allowed "$day" "$hour")" = "Allowed" ]; then
     allowed_now=true
 fi
 
-ts_latest=$(git log --pretty=format:%ci | sort -n | tail -1)
+ts_latest=$(git log --pretty=format:%ct | sort -n | tail -1)
 
 if [ "$allowed_now" = true ]; then
     echo "allowed to commit now."
-    if [ "$($DATE -d "${ts_latest}" +%s)" -gt "$($DATE +%s)" ]; then
+    if [ "$ts_latest" -gt "$now" ]; then
         echo "but there are commits in the future."
     else
         echo "and there are no commits in the future."
@@ -55,32 +54,37 @@ if [ "$allowed_now" = true ]; then
     fi
 fi
 
-commit_time=""
 fuzz="$(od -An -N2 -t u2 /dev/urandom | tr -dc '0-9')"
 fuzz=$((fuzz % 10))
-offset=$fuzz
 
-echo "latest commit time: [${ts_latest}]"
+echo "latest commit time: [$(fmt_ts "$ts_latest" "%Y-%m-%d %H:%M:%S %z")]"
+candidate=$ts_latest
 while true; do
-    day=$($DATE -d "${ts_latest} +${offset} min" +"%a")
-    hour=$($DATE -d "${ts_latest} +${offset} min" +"%H")
-    if [ "$(check_allowed "$day" "$hour")" != "Allowed" ]; then
-        offset=$((offset + fuzz))
-        continue
+    candidate=$((candidate + 60))
+    day=$(fmt_ts "$candidate" "%a")
+    hour=$(fmt_ts "$candidate" "%H")
+    if [ "$(check_allowed "$day" "$hour")" = "Allowed" ]; then
+        # spread commits across the window instead of stacking them
+        # all on its first minute
+        fuzzed=$((candidate + fuzz * 60))
+        day=$(fmt_ts "$fuzzed" "%a")
+        hour=$(fmt_ts "$fuzzed" "%H")
+        if [ "$(check_allowed "$day" "$hour")" = "Allowed" ]; then
+            candidate=$fuzzed
+        fi
+        break
     fi
-    commit_time=$($DATE -d "${ts_latest} +${offset} min" +"%Y-%m-%d %H:%M:%S")
-    break
 done
-if [ "$($DATE -d "$commit_time" +%s)" -gt "$($DATE +%s)" ]; then
+commit_time="$(fmt_ts "$candidate" "%Y-%m-%dT%H:%M:%S%z")"
+if [ "$candidate" -gt "$now" ]; then
     echo "fake commit time: [${commit_time}]"
+    GIT_AUTHOR_DATE="$commit_time"
+    GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
+    export GIT_AUTHOR_DATE
+    export GIT_COMMITTER_DATE
+
+    git commit --amend --date "$GIT_AUTHOR_DATE" --no-edit
 else
     echo "real commit time: [${commit_time}]"
     exit 0
 fi
-
-GIT_AUTHOR_DATE="$($DATE --date="${commit_time}" --iso-8601=seconds)"
-GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
-export GIT_AUTHOR_DATE
-export GIT_COMMITTER_DATE
-
-git commit --amend --date "$GIT_AUTHOR_DATE" --no-edit
